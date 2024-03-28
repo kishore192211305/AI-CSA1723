@@ -1,0 +1,31 @@
+from itertools import permutations
+
+def tsp_brute_force(graph):
+    n = len(graph)
+    min_cost = float('inf')
+    best_path = None
+
+    # Generate all possible permutations of cities to visit
+    for path in permutations(range(n)):
+        current_cost = 0
+        for i in range(n - 1):
+            current_cost += graph[path[i]][path[i + 1]]
+        current_cost += graph[path[-1]][path[0]]  # Return to the starting city
+
+        if current_cost < min_cost:
+            min_cost = current_cost
+            best_path = path
+
+    return best_path, min_cost
+
+# Example graph represented as an adjacency matrix
+graph = [
+    [0, 10, 15, 20],
+    [10, 0, 35, 25],
+    [15, 35, 0, 30],
+    [20, 25, 30, 0]
+]
+
+best_path, min_cost = tsp_brute_force(graph)
+print("Shortest path:", best_path)
+print("Minimum cost:", min_cost)

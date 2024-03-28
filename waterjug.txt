@@ -1,0 +1,83 @@
+from collections import deque
+
+# Define a state class to represent the state of the jugs
+class State:
+    def __init__(self, x, y, parent=None):
+        self.x = x
+        self.y = y
+        self.parent = parent
+
+    # Check if the state is valid
+    def is_valid(self, x_limit, y_limit):
+        return 0 <= self.x <= x_limit and 0 <= self.y <= y_limit
+
+    # Check if the state is the goal state
+    def is_goal(self, z):
+        return self.x == z or self.y == z
+
+    # Get all possible next states from the current state
+    def get_next_states(self, x_limit, y_limit):
+        next_states = []
+
+        # Fill jug x
+        next_states.append(State(x_limit, self.y, self))
+        # Fill jug y
+        next_states.append(State(self.x, y_limit, self))
+        # Empty jug x
+        next_states.append(State(0, self.y, self))
+        # Empty jug y
+        next_states.append(State(self.x, 0, self))
+        # Pour from x to y until y is full or x is empty
+        next_states.append(State(max(0, self.x - (y_limit - self.y)), min(self.y + self.x, y_limit), self))
+        # Pour from y to x until x is full or y is empty
+        next_states.append(State(min(self.x + self.y, x_limit), max(0, self.y - (x_limit - self.x)), self))
+
+        return next_states
+
+# Function to solve the water jug problem using BFS
+def solve_water_jug(x_limit, y_limit, z):
+    visited = set()
+    queue = deque()
+    initial_state = State(0, 0)
+    queue.append(initial_state)
+
+    while queue:
+        current_state = queue.popleft()
+
+        if current_state.is_goal(z):
+            return current_state
+
+        if current_state not in visited:
+            visited.add(current_state)
+
+            next_states = current_state.get_next_states(x_limit, y_limit)
+
+            for next_state in next_states:
+                if next_state not in visited:
+                    queue.append(next_state)
+
+    return None
+
+# Main function
+def main():
+    x_limit = int(input("Enter the capacity of the first jug: "))
+    y_limit = int(input("Enter the capacity of the second jug: "))
+    z = int(input("Enter the target amount of water: "))
+
+    result = solve_water_jug(x_limit, y_limit, z)
+
+    if result:
+        print("Target amount of water can be achieved.")
+        print("Steps to achieve the target:")
+        path = []
+        while result.parent:
+            path.append((result.x, result.y))
+            result = result.parent
+        path.append((result.x, result.y))
+        for step in reversed(path):
+            print(step)
+    else:
+        print("Target amount of water cannot be achieved.")
+
+if __name__ == "__main__":
+    main()
